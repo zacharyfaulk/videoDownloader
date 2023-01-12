@@ -1,6 +1,7 @@
 # Importing necessary packages
 import tkinter as tk
-# import ffmpeg
+import ffmpeg
+import os
 from tkinter import *
 from pytube import YouTube
 # make sure pytube is updated!!!!
@@ -79,33 +80,37 @@ def download():
     # YouTube video and selecting the first
     # from the
     video_stream = get_video.streams.get_highest_resolution()
-    # video_title = get_video.streams[0].title
+    default_video_title = get_video.streams[0].title
     video_title = video_Title.get()
-    print(video_title)
+    print(default_video_title)
     print("4")
 
     #########################################################################
-    # get_video.streams.filter(abr="160kbps", progressive=False).first().download(filename="audio.mp3")
-    # audio = ffmpeg.input("audio.mp3")
+    get_video.streams.filter(progressive=False).order_by('abr').desc().first().download(filename="audio.mp3")
+    audio = ffmpeg.input("audio.mp3")
 
-    # get_video.streams.filter(res="1080p", progressive=False).first().download(filename="video.mp4")
-    # video = ffmpeg.input("video.mp4")
+    get_video.streams.filter(progressive=False).order_by('resolution').desc().first().download(filename="video.mp4")
+    video = ffmpeg.input("video.mp4")
+    print("5")
+    if video_title:
+        ffmpeg.output(audio, video, filename=download_folder + video_title + ".mp4").run(overwrite_output=True)
+    else:
+        ffmpeg.output(audio, video, filename=download_folder + default_video_title + ".mp4").run(overwrite_output=True)
+    print("6")
 
-    # if video_title:
-    #    ffmpeg.output(audio, video, filename=video_title + ".mp4").run(overwrite_output=True)
-    # else:
-    #    ffmpeg.output(audio, video, filename="test.mp4").run(overwrite_output=True)
-    # print("6")
+    os.remove("video.mp4")
+    os.remove("audio.mp3")
 
+    print("7")
     #########################################################################
 
     # Downloading the video to destination
     # directory
-    if video_title:
-        video_stream.download(download_folder, filename=video_title + ".mp4")
-    else:
-        video_stream.download(download_folder)
-    print("5")
+    # if video_title:
+    #    video_stream.download(download_folder, filename=video_title + ".mp4")
+    # else:
+    #    video_stream.download(download_folder)
+
 
     # Displaying the message
     messagebox.showinfo("SUCCESSFULLY", "DOWNLOADED AND SAVED IN\n" + download_folder)
